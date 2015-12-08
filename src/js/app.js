@@ -1,7 +1,29 @@
-$(document).ready(function(){
-  var CLIENT_ID = '914622242759-fumrinlhcub7gvdv3kvvcetv35lpg2hv.apps.googleusercontent.com';
+var app = angular.module('ggldrive', []);
 
-  var SCOPES = ['https://www.googleapis.com/auth/drive.metadata.readonly'];
+app.controller('ListController',['GglDrvSvc','$scope',function($scope){
+  var lc = this;
+
+  lc.handleAuthClick = function(){
+
+    GglDrvSvc.handleAuthClick();
+  };
+
+}]);
+
+app.controller('DocController',['$scope',function($scope){
+  var dc = this;
+
+}]);
+
+app.value('Setting', {CLIENT_ID: '914622242759-fumrinlhcub7gvdv3kvvcetv35lpg2hv.apps.googleusercontent.com', 
+  SCOPES: ['https://www.googleapis.com/auth/drive.readonly']});
+
+app.service('GglDrvSvc', ['Setting',function(Setting){
+
+ // $(document).ready(function(){
+  //var CLIENT_ID = '914622242759-fumrinlhcub7gvdv3kvvcetv35lpg2hv.apps.googleusercontent.com';
+
+  //var SCOPES = ['https://www.googleapis.com/auth/drive.metadata.readonly'];
   var action;
   if(window.action == 'list'){
     action = listFiles;
@@ -121,7 +143,7 @@ $(document).ready(function(){
     }
   }
 
-  $('#authorize-btn').click(handleAuthClick);
+  //$('#authorize-btn').click(handleAuthClick);
 
 
-});
+}]);
