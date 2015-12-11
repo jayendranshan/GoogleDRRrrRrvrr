@@ -12,7 +12,7 @@ angular.module('ggldrive', ['ngRoute'])
     controllerAs: 'dc'
   })
   .otherwise({
-   redirectTo: 'list'
+   redirectTo: '/list'
   });
 
 

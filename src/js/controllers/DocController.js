@@ -1,15 +1,14 @@
+
 angular.module('ggldrive')
-.controller('DocController',['GglDrvSvc','$scope',function(GglDrvSvc,$scope){
+.controller('DocController',['GglDrvSvc','$routeParams',function(GglDrvSvc,$routeParams){
   var dc = this;
 
   dc.DocList = [];
 
-  dc.handleAuthClick = function(){
-
-    GglDrvSvc.handleAuthClick();
-
-    //dc.DocList = localStorage.getItem("DocList");
-    //console.log(dc.DocList);
+ lc.handleAuthClick = function(){
+  window.action == 'doc'
+   GglDrvSvc.handleAuthClick();
+  console.log($routeParams.id);
 };
 
 }]);

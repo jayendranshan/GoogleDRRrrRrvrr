@@ -1,12 +1,12 @@
 angular.module('ggldrive')
-.service('GglDrvSvc', ['Setting',function(Setting){
-
+.service('GglDrvSvc', ['Setting','$http', '$rootScope',function(Setting,$http,$rootScope){
+var that = this;
  //$(document).ready(function(){
   var action;
   if(window.action == 'list'){
-    action = listFiles;
+    action = that.listFiles;
   } else if(window.action = 'doc'){
-    action = displayFile;
+    action = that.displayFile;
   }
 
   var docList = [];
@@ -20,7 +20,7 @@ angular.module('ggldrive')
         'client_id': CLIENT_ID,
         'scope': SCOPES.join(' '),
         'immediate': true
-      }, handleAuthResult);
+      }, this.handleAuthResult);
   };
 
   /**
@@ -28,7 +28,7 @@ angular.module('ggldrive')
    *
    * @param {Object} authResult Authorization result.
    */
-  function handleAuthResult(authResult) {
+  this.handleAuthResult = function(authResult) {
     var authorizeDiv = document.getElementById('authorize-div');
     if (authResult && !authResult.error) {
       // Hide auth UI, then load client library.
@@ -47,12 +47,11 @@ angular.module('ggldrive')
    *
    * @param {Event} event Button click event.
    */
-  function handleAuthClick(event) {
-    console.log('handleAuthClick1');
+  this.handleAuthClick = function(event) {
+    //console.log('handleAuthClick1');
     gapi.auth.authorize(
       {client_id: CLIENT_ID, scope: SCOPES, immediate: false},
-      handleAuthResult);
-    console.log('handleAuthClick2');
+      this.handleAuthResult);
     return false;
   }
 
@@ -60,47 +59,60 @@ angular.module('ggldrive')
    * Load Drive API client library.
    */
   function loadDriveApi() {
-    gapi.client.load('drive', 'v2',action);
+      gapi.client.load('drive', 'v2',null);
+      if(window.action=='list')
+      {
+        alert('loadDriveApi-list');
+        that.listFiles();
+      }
+      else (window.action=='doc')
+      {
+        alert('loadDriveApi-doc');
+        that.displayFile();
+      }
+      
   }
 
   /**
    * Print files.
    */
-  function listFiles() {
-    var request = gapi.client.drive.files.list({
-        'maxResults': 10,
-        'q': "mimeType = 'application/vnd.google-apps.document'"
-      });
-      console.log('listFiles');
+  this.listFiles = function() {
+    var listD = [];
+     var request = gapi.client.request({
+        'path': '/drive/v2/files',
+        'method': 'GET',
+        'params': {'maxResults': '5','q': "mimeType = 'application/vnd.google-apps.document'"}
+        });
+      //console.log('listFiles');
       request.execute(function(resp) {
         var files = resp.items;
         if (files && files.length > 0) {
           for (var i = 0; i < files.length; i++) {
             var file = files[i];
             appendLink(file.id, file.title);
+            //alert(files[i].title);
 
-              docList.push({
-              id : file.id,
-              title : file.title,
+            listD.push({
+              id : files[i].id,
+              title : files[i].title
             });
           }
         } else {
           appendLink('', 'No files found.');
-          docList.push({
-              id : '',
-              title : 'No files found.',
-            });
         }
       });
-      console.log(docList);
+      //console.log('listFiles-end');
+    //console.log(listD.id);
   }
 
-  
-
-  function displayFile() {
+  this.displayFile = function () {
     fileId = window.location.hash.substring(1);
-    //alert(window.action);
-    var request = gapi.client.drive.files.get({fileId: fileId});
+    //var request = gapi.client.drive.files.get({fileId: fileId});
+
+    var request = gapi.client.request({
+        'path': '/drive/v2/files/'+fileId,
+            'method': 'GET'
+        });
 
     request.execute(function(resp) {
       var accessToken = gapi.auth.getToken().access_token;
@@ -126,7 +138,7 @@ angular.module('ggldrive')
    * @param {string} id Id to be used in the link's href attribute.
    * @param {string} text Text to be placed in a element.
    */
-  function appendLink(id, text){
+  function appendLink (id, text){
     if(id != ''){
       var li = $('<li></li>');
       var link = $('<a></a>');

@@ -4,11 +4,9 @@ angular.module('ggldrive')
   lc.DocList = [];
 
   lc.handleAuthClick = function(){
-
+  window.action == 'list'
    GglDrvSvc.handleAuthClick();
 
-    //GglDrvSvc.listFile();
-    //console.log(auth);
   };
 
 }]);
