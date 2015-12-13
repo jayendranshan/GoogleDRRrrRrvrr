@@ -1,5 +1,7 @@
 angular.module('ggldrive')
-.service('GglDrvSvc', ['Setting','$http', '$rootScope',function(Setting,$http,$rootScope){
+.service('GglDrvSvc', ['Setting','$http', '$rootScope','$q',function(Setting,$http,$rootScope,$q){
+
+
 var that = this;
  //$(document).ready(function(){
   var action;
@@ -10,6 +12,41 @@ var that = this;
   }
 
   var docList = [];
+ var data;
+
+  /*this.login = function () {
+    var deferred = $q.defer();
+    gapi.auth.authorize({ 
+    client_id: CLIENT_ID, 
+    scope: SCOPES, 
+    immediate: false//, 
+    //hd: domain 
+    }, this.handleAuthResultListFiles );
+return deferred.promise;
+}
+
+this.handleAuthResultListFiles = function(authResult) {
+  if (authResult && !authResult.error) {
+    var deferred = $q.defer();
+    var data;
+    gapi.client.load('drive', 'v2', function () {
+    var request = gapi.client.drive.files.list({
+    'maxResults': 10,
+    'q': "mimeType = 'application/vnd.google-apps.document'"
+    });// gapi.client.oauth2.userinfo.get();
+
+    request.execute(function (resp) {
+        deferred.resolve(resp.items);
+        data = resp.items;
+        $rootScope.listItems = resp.items;
+        //console.log(data);
+      });
+    });
+    } 
+  else {
+    deferred.reject('error');
+    }
+};*/
 
   /**
    * Check if current user has authorized this application.
@@ -33,7 +70,6 @@ var that = this;
     if (authResult && !authResult.error) {
       // Hide auth UI, then load client library.
       authorizeDiv.style.display = 'none';
-      console.log('handleAuthResult');
       loadDriveApi();
     } else {
       // Show auth UI, allowing the user to initiate authorization by
@@ -48,7 +84,6 @@ var that = this;
    * @param {Event} event Button click event.
    */
   this.handleAuthClick = function(event) {
-    //console.log('handleAuthClick1');
     gapi.auth.authorize(
       {client_id: CLIENT_ID, scope: SCOPES, immediate: false},
       this.handleAuthResult);
@@ -62,12 +97,10 @@ var that = this;
       gapi.client.load('drive', 'v2',null);
       if(window.action=='list')
       {
-        alert('loadDriveApi-list');
         that.listFiles();
       }
       else (window.action=='doc')
       {
-        alert('loadDriveApi-doc');
         that.displayFile();
       }
       
@@ -77,38 +110,30 @@ var that = this;
    * Print files.
    */
   this.listFiles = function() {
-    var listD = [];
+
      var request = gapi.client.request({
         'path': '/drive/v2/files',
         'method': 'GET',
         'params': {'maxResults': '5','q': "mimeType = 'application/vnd.google-apps.document'"}
         });
-      //console.log('listFiles');
       request.execute(function(resp) {
         var files = resp.items;
         if (files && files.length > 0) {
           for (var i = 0; i < files.length; i++) {
             var file = files[i];
+            console.log(file);
             appendLink(file.id, file.title);
-            //alert(files[i].title);
-
-            listD.push({
-              id : files[i].id,
-              title : files[i].title
-            });
           }
         } else {
           appendLink('', 'No files found.');
         }
       });
-      //console.log('listFiles-end');
-    //console.log(listD.id);
   }
 
   this.displayFile = function () {
     fileId = window.location.hash.substring(1);
+    
     //var request = gapi.client.drive.files.get({fileId: fileId});
-
     var request = gapi.client.request({
         'path': '/drive/v2/files/'+fileId,
             'method': 'GET'
@@ -117,18 +142,21 @@ var that = this;
     request.execute(function(resp) {
       var accessToken = gapi.auth.getToken().access_token;
 
-      $.ajax({
-        url: resp.exportLinks["text/plain"],
-        type: "GET",
-        beforeSend: function(xhr){
-          xhr.setRequestHeader('Authorization', "Bearer "+accessToken);
-        },
-        success: function( data ) {
-          $('#outputDoc').html(data.replace(/\n/g, "<br>"));
-        }
+      $http.get('https://docs.google.com/feeds/download/documents/export/Export?id='+fileId,
+        {
+                headers: {Authorization: 'Bearer '+accessToken,'Content-Type': 'text/plain'}
+            }
+        )//,Content-Type: 'text/plain',Authorization: 'Bearer '+accessToken
+      .then(function(response){
+        //console.log(response.data);
+        data=response.data;
+        $('#outputDoc').html(data.replace(/\n/g, "<br>"));
+        console.log(data.replace(/\n/g, "<br>"));
+        return response.data.replace(/\n/g, "<br>");
       });
-
     });
+    //console.log(data);
+    //return data.replace(/\n/g, "<br>");
   }
 
   /**
@@ -153,6 +181,28 @@ var that = this;
   }
 //});
   //$('#authorize-btn').click(handleAuthClick);
+
+  this.displayFileTest = function (id) {
+    var request = gapi.client.request({
+        'path': '/drive/v2/files/'+id,
+            'method': 'GET'
+        });
+    request.execute(function(resp) {
+      var accessToken = gapi.auth.getToken().access_token;
+
+      $http.get('https://docs.google.com/feeds/download/documents/export/Export?id='+id,
+        {
+                headers: {Authorization: 'Bearer '+accessToken,'Content-Type': 'text/plain'}
+            }
+        )
+      .then(function(response){
+        data=response.data;
+        $('#outputDoc').html(data.replace(/\n/g, "<br>"));
+        return response.data;
+      });
+    });
+  }
+
 
 
 }]);

@@ -5,15 +5,15 @@ angular.module('ggldrive', ['ngRoute'])
     templateUrl: 'templates/list.html',
     controller: 'ListController',
     controllerAs: 'lc'
-  })
-  .when('/doc', {
+  });
+  /*.when('/doc#id', {
     templateUrl: 'templates/doc.html',
     controller: 'DocController',
     controllerAs: 'dc'
   })
   .otherwise({
    redirectTo: '/list'
-  });
+  });*/
 
 
 }]);

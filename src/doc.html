@@ -11,7 +11,7 @@
         }
       }, 2000);
     };
-    //window.action = "doc";
+    window.action = "doc";
     </script>
     <script src="vendors.js"></script>
     <script src="app.js"></script>
@@ -19,7 +19,21 @@
   </head>
   <body class="container">
     <h1>Hello Google DRRrrRrvrr!</h1>
-    <div class="row" ng-view></div>
+    <div id="dvDocs" ng-controller="DocController as dc">
+    <div class="col-md-12" id="divButton">
+      <button id="authorize-btn" class="btn" ng-click = "dc.getDocContent()">
+        Get Document Content
+      </button>
+    </div>
+    <div id="outputDoc" class="well">
+      {{dc.docContent}}
+    </div>
+
+    <div id="outputDocZombie" class="well">
+
+      {{dc.zombieDocContent}}
+    </div>
+  </div>
   </body>
 </html>
 

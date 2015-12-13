@@ -7,6 +7,16 @@
       </button>
     </div>
 
+<oAuth></oAuth>
     <div id="output" class="well">
       <ul></ul>
+    </div>
+
+     <div id="dvoutput" class="well">
+      <table class="table table-striped table-bordered">
+      	<caption>Document List</caption>
+      	<tr ng-repeat="document in lc.Documents">
+      		<td><a ng-href="/doc.html#{{document.id}}" ng-click="lc.geDoc($document.id)">{{document.title}}</a></td>
+    	</tr>
+      </table>
     </div>
